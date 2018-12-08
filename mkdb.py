@@ -55,8 +55,6 @@ def insert_grant( amt, year, desc, contact, tele, ein, rid, gc_id, c ):
   query = query + ' values ( ?, ?, ?, ?, ?, ?, ?, ? );' 
 
   c.execute( query, ( amt, year, desc, contact, tele, ein, rid, gc_id ) )
-  c.execute( "SELECT last_insert_rowid();" )
-  return c.fetchone()[0]
 
 def main():
   workbook = xlrd.open_workbook( "Adam-Spreadsheet.xlsx" )
@@ -67,10 +65,14 @@ def main():
   itr = sheet.get_rows()
   next( itr )
 
+  i = 0
+
   for row in itr:
 
+    i = i + 1
+
     if ( not row[0].value ): 
-      continue
+      break
 
     ein = insert_foundation( row[0].value, row[1].value, row[2].value, row[3].value, c )
     r_id = insert_recipient( row[4].value, row[5].value, row[6].value, c )
@@ -83,6 +85,7 @@ def main():
       row[12].value,
       ein, r_id, gc_id, c )
 
+  print( "Loop iterated %d times" % i )
   conn.commit()
   conn.close()
 
