@@ -1,7 +1,6 @@
 
 import xlrd
 import sqlite3
-import time
 
 ein_set = set([])
 rname_set = set([])
@@ -48,7 +47,8 @@ def insert_grant( amt, year, desc, contact, tele, ein, rid, gc_id, c ):
   rid = int( rid )
   gc_id = int( gc_id )
 
-  print( "< %d >, < %d >, < %s >, < %s >, < %s >, < %d >, < %d >, < %d >" % ( amt, year, desc, contact, tele, ein, rid, gc_id ) )
+  print( "< %d >, < %d >, < %s >, < %s >, < %s >, < %d >, < %d >, < %d >" 
+          % ( amt, year, desc, contact, tele, ein, rid, gc_id ) )
 
   query = 'INSERT INTO FGrant ( amount, year, description, '
   query = query + 'contact, telephone, foundation_id, recipient_id, giving_cat_id  )'
@@ -82,8 +82,6 @@ def main():
       row[11].value, 
       row[12].value,
       ein, r_id, gc_id, c )
-
-    #time.sleep( 1 )
 
   conn.commit()
   conn.close()
