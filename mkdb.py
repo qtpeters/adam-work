@@ -1,48 +1,60 @@
 
 import xlrd
 import sqlite3
+import time
 
 ein_set = set([])
 rname_set = set([])
-gc_name = set([])
+gc_name_set = set([])
 
 def insert_foundation( ein, name, city, state, c ):
-  
+ 
+  ein = int( ein )
+
   if ( not ( ein in ein_set ) ):
     ein_set.add( ein )
-    query = 'INSERT INTO Foundation ( ein, name, city, state )'
-    query = query + ' values ( %d, "%s", "%s", "%s" );' % ( int( ein ), 
-                                                          name, city, state )
-    c.execute( query )
+    query = "INSERT INTO Foundation ( ein, name, city, state )"
+    query = query + " values ( ?, ?, ?, ? );" 
+    c.execute( query, ( ein, name, city, state ) )
 
-  c.execute( "SELECT last_insert_rowid();" )
-  return c.fetchone()[0]
+  return ein
 
 def insert_recipient( name, city, state, c ):
-  query = 'INSERT INTO Recipient ( name, city, state )'
-  query = query + ' values ( "%s", "%s", "%s" );' % ( name, 
-                                                      city, 
-                                                      state )
-  c.execute( query )
-  c.execute( "SELECT last_insert_rowid();" )
+
+  if ( not ( name in rname_set ) ):
+    rname_set.add( name ) 
+    query = "INSERT INTO Recipient ( name, city, state )"
+    query = query + " values ( ?, ?, ? );"
+    c.execute( query, ( name, city, state ) )
+  
+  c.execute( "SELECT id FROM Recipient WHERE name = ?", ( name, ) )
   return c.fetchone()[0]
 
 def insert_giving_category( name, c ):
-  query = 'INSERT INTO Giving_Category ( name )'
-  query = query + ' values ( "%s" );' % name 
-  c.execute( query )
-  c.execute( "SELECT last_insert_rowid();" )
+  
+  if ( not ( name in gc_name_set ) ):
+    gc_name_set.add( name ) 
+    query = "INSERT INTO Giving_Category ( name ) values ( ? );"
+    c.execute( query, ( name, ) )
+  
+  c.execute( "SELECT id FROM Giving_Category WHERE name = ?", ( name, ) )
   return c.fetchone()[0]
 
 def insert_grant( amt, year, desc, contact, tele, ein, rid, gc_id, c ):
+  
+  amt = int( amt )
+  year = int( year )
+  ein = int( ein )
+  rid = int( rid )
+  gc_id = int( gc_id )
 
-  print( "Amt: %s" % amt )
+  print( "< %d >, < %d >, < %s >, < %s >, < %s >, < %d >, < %d >, < %d >" % ( amt, year, desc, contact, tele, ein, rid, gc_id ) )
+
   query = 'INSERT INTO FGrant ( amount, year, description, '
   query = query + 'contact, telephone, foundation_id, recipient_id, giving_cat_id  )'
-  query = query + ' values ( %d, %d, "%s", "%s", "%s", %d, %d, %d );' % ( int( amt ), int( year ), desc, 
-                                                      contact, tele, int( ein ), 
-                                                      int( rid ), int( gc_id ) )
-  c.execute( query )
+  query = query + ' values ( ?, ?, ?, ?, ?, ?, ?, ? );' 
+
+  c.execute( query, ( amt, year, desc, contact, tele, ein, rid, gc_id ) )
   c.execute( "SELECT last_insert_rowid();" )
   return c.fetchone()[0]
 
@@ -70,6 +82,8 @@ def main():
       row[11].value, 
       row[12].value,
       ein, r_id, gc_id, c )
+
+    #time.sleep( 1 )
 
   conn.commit()
   conn.close()
